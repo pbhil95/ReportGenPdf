@@ -6,6 +6,3 @@ def fetchSchoolDetails():
     for sd in sData:
         sdata = sData[sd]
     return sdata
-
-def hi():
-    
