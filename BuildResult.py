@@ -5,7 +5,7 @@ from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import utils
 
-def fetchResultSubject(roll,schoolDetails,sDetails,result,
+def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
                        ScholasticAreasGrade,DisciplneGrade):
     elements = []
     styleSheet = getSampleStyleSheet()
@@ -23,7 +23,11 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,
          'UT4', 'UT5', 'UT6', 'Annual\nExam', 'Total', 'Grand\nTotal',
          'Grade', 'Rank']]
 
-    data4 = ['']
+    data41 = [['Overall Mark']]
+    data42 = [['Percentage']]
+    data43 = [['Grade']]
+    data44 = [['Rank']]
+    
 
     data51 = [['Co-Scholastic Areas\n(3 Points grading scale A,B,C)'],
               ['Activity', 'T1', 'T2']]
@@ -39,6 +43,7 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,
     getSchoolDetails(roll,schoolDetails,data1)
     getStudentDetails(sDetails,data2)
     resultExamWise(result, data3)
+    getOverAll(overAll,data41,data42,data43,data44)
     CoScholasticGrade(ScholasticAreasGrade, data51)
     DiscplineGrade(DisciplneGrade, data52)
 
@@ -76,7 +81,34 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,
         ('SPAN', (11, 1), (13, 1))
     ])
 
-    t4 = Table(data4)
+    t41 = Table(data41,colWidths=[70,60],
+               style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ],)
+    t42 = Table(data42,colWidths=[70,60],
+               style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ],)
+    t43 = Table(data43,colWidths=[70,33],
+               style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ],)
+    t44 = Table(data44,colWidths=[70,32],
+               style=[
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ],)
+               
+    
+    data4=[[t41,t42,t43,t44]]
+    
+    t4 = Table(data4,colWidths=[165,165,120,120],
+               style=[
+        #('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('LEFTPADDING', (0, 0), (2, 0), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ('LEFTPADDING', (3, 0), (3, 0), 18),
+        ],)
 
     t51 = Table(data51, colWidths=[185, 50, 50],
                 style=[
@@ -210,11 +242,10 @@ def getStudentDetails(sdetails,data2):
     data2.append([colmname,mname])
     data2.append([coldob,dob])
     data2.append([coladdress,address])
-    
-    
-    
+
 
 def resultExamWise(result, data3):
+    
     s1 = result.columns[1]
     s2 = result.columns[2]
     s3 = result.columns[3]
@@ -241,14 +272,40 @@ def resultExamWise(result, data3):
     sub5.insert(0, result.columns[5])
     sub6 = result[s6].tolist().copy()
     sub6.insert(0, result.columns[6])
+    
 
-    data3.append(sub1)
-    data3.append(sub2)
-    data3.append(sub3)
-    data3.append(sub4)
-    data3.append(sub5)
-    data3.append(sub6)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub1)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub2)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub3)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub4)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub5)
+    data3.append(round(num,2) 
+                if isinstance(num, int)
+                or isinstance(num, float) else num for num in sub6)
+   
+   
 
+
+def getOverAll(overAll,data41,data42,data43,data44):
+    overall_col=overAll.columns[7]
+    over_All=overAll[overall_col].tolist().copy()
+    percentage=round(over_All[0]*100/600,2)
+    data41[0].append(str(round(over_All[0],2))+"/600")
+    data42[0].append(percentage)
+    data43[0].append(over_All[1])
+    data44[0].append(over_All[2])
+    
+    
 
 def CoScholasticGrade(ScholasticAreasGrade, data51):
     c1 = ScholasticAreasGrade.columns[1]
