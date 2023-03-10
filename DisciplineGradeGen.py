@@ -1,8 +1,8 @@
 import pandas as pd
-
+from IniRead import ConfigFile
 def fetchDisciplneGrade(roll):
 
-    file = ('./Files/Result.xlsx')
+    file = ConfigFile.Default['ResultFile']
     resultData = pd.read_excel(file, sheet_name=[
         'T1Discipline',
         'T2Discipline'])

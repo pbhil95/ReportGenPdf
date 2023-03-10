@@ -1,8 +1,9 @@
 import pandas as pd
+from IniRead import ConfigFile
 
 def fetchCoScholasticAreasGrade(roll):
 
-    file = ('./Files/Result.xlsx')
+    file = ConfigFile.Default['ResultFile']
     resultData = pd.read_excel(file, sheet_name=[
         'T1CoScholasticAreas',
         'T2CoScholasticAreas', ])

@@ -1,49 +1,70 @@
+from numpy import ceil
 from SchoolDetailsGen import fetchSchoolDetails
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import utils
+from IniRead import ConfigFile
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 
-def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
+def add_background(canvas, doc):
+    canvas.saveState()
+    canvas.drawImage(ImageReader('./Files/Background1.jpg'), 0, 0, 
+                     width=A4[0], height=A4[1])
+    canvas.restoreState()
+
+stylep=getSampleStyleSheet()['Normal']
+
+def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll, attendance,
                        ScholasticAreasGrade,DisciplneGrade):
     elements = []
     styleSheet = getSampleStyleSheet()
-
     data1 = []
 
     data2 = []
 
     data3 = [
-        ['SCHOLASTIC AREA', 'Term-1\n(100 Marks)', '', '', '', '',
-         'Term-2\n(100 Marks)', '', '', '', '', 'OVERALL', '', ''],
-        ['', '', '', '', '', '', '', '', '', '', '',
-            'Term-1(50 Marks)\n+\nTerm-2(50 Marks)', '', ''],
-        ['Subjects', 'UT1', 'UT2', 'UT3', 'Half\nYearly', 'Total',
-         'UT4', 'UT5', 'UT6', 'Annual\nExam', 'Total', 'Grand\nTotal',
-         'Grade', 'Rank']]
+        ['Scholastic Area', 'Term-1\n(100 Marks)', '', '', '',
+         'Term-2\n(100 Marks)','', '', '', 'Overall', '', '', '', '',''],
+        ['', '', '', '', '', '', '', '', '', 'Term-1\n+\nTerm-2', 
+         '','', '', '',''],
+        ['Subjects', 'UT1\n(40)', 'Half Yearly', '', 
+         'UT1+\nHY(T)+\nHY(P)\n(100)', 'UT2\n(40)', 'Yearly', '',
+         'UT2+\nY(T)+\nY(P)\n(100)', 'T1\n(40%)\n+\nT2\n(60%)',
+        'T1+T2\n(80/70)\n(Theo\nry)', '(HYP\n+\nYP)/2\n(Pract\nical)',
+        'Total\nTheory\n+\nPract\nical','Grade','Rank'],
+        ['', '', 'HY(T)\n(80/70)', 'HY(P)\n(20/30)',
+         '', '',
+         'Y(T)\n(80/70)', 'Y(P)\n(20/30)', '', '',
+         '', '', '',
+         '', '']]
 
     data41 = [['Overall Mark']]
     data42 = [['Percentage']]
     data43 = [['Grade']]
-    data44 = [['Rank']]
+    data44 = [['Overall Rank']]
     
 
-    data51 = [['Co-Scholastic Areas\n(3 Points grading scale A,B,C)'],
+    data51 = [['Co-Scholastic Areas\n(Grading scale A1,A2,B1,B2,C1,C2,D1,D2,E)'],
               ['Activity', 'T1', 'T2']]
 
     data52 = [['Discipline\n(3 Points grading scale A,B,C)'],
               ['Activity', 'T1', 'T2']]
     
-    data6=[['Attendance : 256/365','','Remarks : Qualified'],
-           ['Class Teacher','Principal','Exam Incharge'],
-           ['**Congratulation Promoted To Class XII','','Date : 10/07/2005'],
-           ]
+    data61=[]
+    
+    data62=['Class Teacher','Principal','Exam Incharge']
+           
+    data63=['**Congratulation Promoted To Class XII-SC','','Date : 30/4/2022']
 
     getSchoolDetails(roll,schoolDetails,data1)
     getStudentDetails(sDetails,data2)
     resultExamWise(result, data3)
     getOverAll(overAll,data41,data42,data43,data44)
+    getAttendance(attendance,data61)
     CoScholasticGrade(ScholasticAreasGrade, data51)
     DiscplineGrade(DisciplneGrade, data52)
 
@@ -68,17 +89,32 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
                    ('SPAN', (1, 4), (3, 4)),
                ])
 
-    t3 = Table(data3, colWidths=[110, 30, 30, 30, 40, 40,
-                                 30, 30, 30, 40, 40, 40, 40, 40],
+    t3 = Table(data3, colWidths=[110, 25, 35, 35, 35, 27,
+                                 35, 35, 33, 35, 35, 35,35, 30, 30],
                style=[
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (0, -1), 'MIDDLE'),
         ('SPAN', (0, 0), (0, 1)),
-        ('SPAN', (1, 0), (5, 1)),
-        ('SPAN', (6, 0), (10, 1)),
-        ('SPAN', (11, 0), (13, 0)),
-        ('SPAN', (11, 1), (13, 1))
+        ('SPAN', (1, 0), (4, 1)),
+        ('SPAN', (5, 0), (8, 1)),
+        ('SPAN', (9, 0), (14, 0)),
+        ('SPAN', (9, 1), (14, 1)),
+        ('SPAN', (2, 2), (3, 2)),
+        ('SPAN', (6, 2), (7, 2)),
+        ('SPAN', (4, 2), (4, 3)),
+        ('SPAN', (8, 2), (8, 3)),
+        ('SPAN', (9, 2), (9, 3)),
+        ('SPAN', (10, 2), (10, 3)),
+        ('SPAN', (11, 2), (11, 3)),
+        ('SPAN', (12, 2), (12, 3)),
+        ('SPAN', (13, 2), (13, 3)),
+        ('SPAN', (14, 2), (14, 3)),
+        ('SPAN', (1, 2), (1, 3)),
+        ('SPAN', (5, 2), (5, 3)),
+        ('SPAN', (0, 2), (0, 3)),
     ])
 
     t41 = Table(data41,colWidths=[70,60],
@@ -116,6 +152,7 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
         ('SPAN', (0, 0), (2, 0)),
         ('ALIGN', (0, 0), (2, 0), 'CENTER'),
         ('VALIGN', (0, 0), (2, 0), 'MIDDLE'),
+        ('ALIGN', (1, 1), (9, 9), 'CENTER'),
     ])
 
     t52 = Table(data52, colWidths=[185, 50, 50],
@@ -124,6 +161,7 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
         ('SPAN', (0, 0), (2, 0)),
         ('ALIGN', (0, 0), (2, 0), 'CENTER'),
         ('VALIGN', (0, 0), (2, 0), 'MIDDLE'),
+        ('ALIGN', (1, 1), (9, 9), 'CENTER'),
     ])
 
     data5 = [[t51, t52]]
@@ -137,6 +175,7 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
         ],)
     
+    data6=[data61,data62,data63]
     t6=Table(data6,colWidths=[190,190,190],
         style=[
         ('GRID', (0, 0), (0, 0), 0.5, colors.grey),
@@ -170,7 +209,9 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
     t = Table(data,
               style=[
                   #('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                  ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                  ('TOPPADDING', (0, 0), (-1, -1), 1),
+                  ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                  
               ])
 
     elements.append(t)
@@ -179,7 +220,7 @@ def fetchResultSubject(roll,schoolDetails,sDetails,result,overAll,
     doc = SimpleDocTemplate('./Files/ResultPdf/'+str(fname)+".pdf",
                             bottomMargin=5, topMargin=5,
                             rightMargin=10, leftMargin=10,)
-    doc.build(elements)
+    doc.build(elements,onFirstPage=add_background, onLaterPages=add_background)
 
 def getSchoolDetails(roll,schooldetails,data1):
     
@@ -191,7 +232,8 @@ def getSchoolDetails(roll,schooldetails,data1):
     #height=width * aspect
     height=3*cm
 
-    StudentPic = Image('./Files/StudentPics/'+str(roll)+'.jpg'
+    StudentPic = Image('./Files/StudentPics/'
+                       +str(roll)+'.jpg'
                        ,width,height)
     
     
@@ -223,9 +265,11 @@ def getStudentDetails(sdetails,data2):
     coldob = sdetails.columns[3]
     colcls = sdetails.columns[4]
     colsection = sdetails.columns[5]
-    colmname= sdetails.columns[6]
-    colfname= sdetails.columns[7]
-    coladdress= sdetails.columns[8]
+    colgender = sdetails.columns[6]
+    colcategory = sdetails.columns[7]
+    colmname= sdetails.columns[8]
+    colfname= sdetails.columns[9]
+    coladdress= sdetails.columns[10]
 
     roll = sdetails[sdetails.columns[0]].to_string(index=False)
     ano = sdetails[sdetails.columns[1]].to_string(index=False)
@@ -233,15 +277,17 @@ def getStudentDetails(sdetails,data2):
     dob = sdetails[sdetails.columns[3]].to_string(index=False)
     cls = sdetails[sdetails.columns[4]].to_string(index=False)
     section = sdetails[sdetails.columns[5]].to_string(index=False)
-    mname= sdetails[sdetails.columns[6]].to_string(index=False)
-    fname= sdetails[sdetails.columns[7]].to_string(index=False)
-    address= sdetails[sdetails.columns[8]].to_string(index=False)
+    gender = sdetails[sdetails.columns[6]].to_string(index=False)
+    category = sdetails[sdetails.columns[7]].to_string(index=False)
+    mname= sdetails[sdetails.columns[8]].to_string(index=False)
+    fname= sdetails[sdetails.columns[9]].to_string(index=False)
+    address= sdetails[sdetails.columns[10]].to_string(index=False)
 
     data2.append([colname,name,colroll,roll])
     data2.append([colfname,fname,colano,ano])
-    data2.append([colmname,mname])
-    data2.append([coldob,dob])
-    data2.append([coladdress,address])
+    data2.append([colmname,mname,colgender,gender])
+    data2.append([coldob,dob,colcategory,category])
+    data2.append([coladdress,Paragraph(address,stylep)])
 
 
 def resultExamWise(result, data3):
@@ -252,6 +298,7 @@ def resultExamWise(result, data3):
     s4 = result.columns[4]
     s5 = result.columns[5]
     s6 = result.columns[6]
+    s7 = result.columns[7]
 
     sub1 = []
     sub2 = []
@@ -259,6 +306,7 @@ def resultExamWise(result, data3):
     sub4 = []
     sub5 = []
     sub6 = []
+    sub7 = []
 
     sub1 = result[s1].tolist().copy()
     sub1.insert(0, result.columns[1])
@@ -272,32 +320,40 @@ def resultExamWise(result, data3):
     sub5.insert(0, result.columns[5])
     sub6 = result[s6].tolist().copy()
     sub6.insert(0, result.columns[6])
+    sub7= result[s7].tolist().copy()
+    sub7.insert(0, result.columns[7])
     
-
-    data3.append(round(num,2) 
+    data3.append(int(ceil(num))
                 if isinstance(num, int)
                 or isinstance(num, float) else num for num in sub1)
-    data3.append(round(num,2) 
+    data3.append(int(ceil(num)) 
                 if isinstance(num, int)
                 or isinstance(num, float) else num for num in sub2)
-    data3.append(round(num,2) 
+    data3.append(int(ceil(num)) 
                 if isinstance(num, int)
                 or isinstance(num, float) else num for num in sub3)
-    data3.append(round(num,2) 
+    data3.append(int(ceil(num)) 
                 if isinstance(num, int)
                 or isinstance(num, float) else num for num in sub4)
-    data3.append(round(num,2) 
+    data3.append(int(ceil(num)) 
                 if isinstance(num, int)
                 or isinstance(num, float) else num for num in sub5)
-    data3.append(round(num,2) 
-                if isinstance(num, int)
-                or isinstance(num, float) else num for num in sub6)
+    if 0 in sub6:
+        data3.append(int(ceil(num)) 
+                    if isinstance(num, int)
+                    or isinstance(num, float) else num for num in sub7)
+    else:
+        data3.append(int(ceil(num)) 
+                    if isinstance(num, int)
+                    or isinstance(num, float) else num for num in sub6)
+        
+    
    
    
 
 
 def getOverAll(overAll,data41,data42,data43,data44):
-    overall_col=overAll.columns[7]
+    overall_col=overAll.columns[8]
     over_All=overAll[overall_col].tolist().copy()
     percentage=round(over_All[0]*100/600,2)
     data41[0].append(str(round(over_All[0],2))+"/600")
@@ -305,7 +361,15 @@ def getOverAll(overAll,data41,data42,data43,data44):
     data43[0].append(over_All[1])
     data44[0].append(over_All[2])
     
-    
+def getAttendance(attendance,data61):
+    attendance_col1=attendance.columns[1]
+    attendance_col2=attendance.columns[2]
+    attend_Dance1=attendance[attendance_col1].tolist().copy()
+    attend_Dance2=attendance[attendance_col2].tolist().copy()
+    attdend="Attendance : "+str(attend_Dance1[0])+"/"+str(attend_Dance2[0])
+    data61.append(attdend)
+    data61.append("")
+    data61.append("Result : Qualified")
 
 def CoScholasticGrade(ScholasticAreasGrade, data51):
     c1 = ScholasticAreasGrade.columns[1]
